@@ -1,18 +1,26 @@
+// app/page.tsx
 "use client";
 
 import React from 'react';
+import { Amplify } from 'aws-amplify';
 import { Authenticator } from '@aws-amplify/ui-react';
+import awsExports from '@/amplify_outputs.json'; // adjust the path as needed
 import '@aws-amplify/ui-react/styles.css';
 
-export default function AuthPage() {
+// Configure Amplify with the generated settings
+Amplify.configure(awsExports);
+
+export default function Page() {
   return (
     <Authenticator>
       {({ signOut, user }) => (
-        <main style={{ padding: '2rem' }}>
+        <main style={{ padding: '2rem', fontFamily: 'sans-serif' }}>
           <h1>Welcome, {user.username}!</h1>
-          <p>You are now logged in.</p>
-          <button onClick={signOut}>Sign Out</button>
-          {/* Insert your protected app content here */}
+          <p>You are successfully logged in.</p>
+          <button onClick={signOut} style={{ padding: '0.5rem 1rem', marginTop: '1rem' }}>
+            Sign Out
+          </button>
+          {/* Add your protected content here */}
         </main>
       )}
     </Authenticator>
