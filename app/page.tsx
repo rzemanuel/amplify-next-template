@@ -2,36 +2,13 @@
 
 import React, { useState } from "react";
 import { Amplify } from "aws-amplify";
-import { Storage } from '@aws-amplify/storage';
-import { generateClient } from "aws-amplify/api";
+import { uploadData } from "aws-amplify/storage";
 import { Authenticator } from "@aws-amplify/ui-react";
 import awsExports from "@/amplify_outputs.json";
 import "@aws-amplify/ui-react/styles.css";
 
 // Configure Amplify
 Amplify.configure(awsExports);
-
-// Initialize API client
-const client = generateClient();
-
-// GraphQL mutation
-const createFileUpload = /* GraphQL */ `
-  mutation CreateFileUpload(
-    $input: CreateFileUploadInput!
-  ) {
-    createFileUpload(input: $input) {
-      id
-      fileKey
-      fileName
-      fileSize
-      uploadedAt
-      status
-      createdAt
-      updatedAt
-      owner
-    }
-  }
-`;
 
 export default function Page() {
   const [file, setFile] = useState<File | null>(null);
@@ -61,33 +38,21 @@ export default function Page() {
     setUploadStatus("Uploading...");
 
     try {
-      // Generate unique file key
       const fileKey = `uploads/${Date.now()}-${file.name}`;
       
-      // Upload to S3
-      const uploadResult = await Storage.put(fileKey, file, {
-        contentType: file.type,
-        progressCallback(progress) {
-          const percentage = (progress.loaded / progress.total) * 100;
-          setUploadStatus(`Uploading: ${Math.round(percentage)}%`);
+      await uploadData({
+        key: fileKey,
+        data: file,
+        options: {
+          contentType: file.type,
+          onProgress: ({ transferredBytes, totalBytes }) => {
+            const percentage = (transferredBytes / totalBytes) * 100;
+            setUploadStatus(`Uploading: ${Math.round(percentage)}%`);
+          },
         },
       });
 
-      // Create database record
-      await client.graphql({
-        query: createFileUpload,
-        variables: {
-          input: {
-            fileKey: uploadResult.key,
-            fileName: file.name,
-            fileSize: file.size,
-            uploadedAt: new Date().toISOString(),
-            status: 'uploaded'
-          }
-        }
-      });
-
-      setUploadStatus(`Upload successful! File key: ${uploadResult.key}`);
+      setUploadStatus(`Upload successful!`);
       setFile(null);
     } catch (error: any) {
       console.error("Upload error:", error);
@@ -104,13 +69,12 @@ export default function Page() {
           <div className="max-w-3xl mx-auto bg-white rounded-lg shadow-lg p-6">
             <div className="flex justify-between items-center mb-6">
               <div>
-                <h1 className="text-2xl font-bold mb-2">Excel Automation Upload</h1>
+                <h1 className="text-2xl font-bold mb-2">Excel Upload</h1>
                 <p className="text-gray-600">Logged in as: {user?.username || "Guest"}</p>
               </div>
               <button
                 onClick={signOut}
                 className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition"
-                disabled={uploading}
               >
                 Sign Out
               </button>
@@ -118,7 +82,7 @@ export default function Page() {
 
             <div className="space-y-6">
               <div>
-                <h2 className="text-lg font-semibold mb-3">Upload your Excel file (.xlsx)</h2>
+                <h2 className="text-lg font-semibold mb-3">Select Excel File (.xlsx)</h2>
                 <input
                   type="file"
                   accept=".xlsx"
