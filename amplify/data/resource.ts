@@ -7,10 +7,10 @@ const schema = a.schema({
       fileKey: a.string(),
       uploadedAt: a.datetime(),
       fileName: a.string(),
-      fileSize: a.string(), // Changed from number to string due to type constraints
+      fileSize: a.string(),
       status: a.string(),
     })
-    .authorization([allow => allow.owner()]) // Fixed authorization syntax
+    .authorization(allow => allow.owner()) // Fixed: Removed array wrapper and simplified
 });
 
 export type Schema = ClientSchema<typeof schema>;
