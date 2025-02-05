@@ -15,7 +15,7 @@ export default function Page() {
     <Authenticator>
       {({ signOut, user }) => (
         <main style={{ padding: '2rem', fontFamily: 'sans-serif' }}>
-          <h1>Welcome, {user.username}!</h1>
+          <h1>Welcome, {user?.username || "Guest"}!</h1>
           <p>You are successfully logged in.</p>
           <button onClick={signOut} style={{ padding: '0.5rem 1rem', marginTop: '1rem' }}>
             Sign Out
