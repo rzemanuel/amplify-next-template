@@ -4,15 +4,17 @@ import { type ClientSchema, a, defineData } from "@aws-amplify/backend";
 This model tracks uploaded Excel files.
 It stores the S3 file key and a timestamp for when the file was uploaded.
 The authorization rule below specifies that only authenticated users
-can create and read their own file records.
+can create and read their file records.
 ========================================================================*/
 const schema = a.schema({
   FileUpload: a
     .model({
       fileKey: a.string(),
-      uploadedAt: a.dateTime(),
+      // Use "datetime" (all lowercase) to define a timestamp field.
+      uploadedAt: a.datetime(),
     })
-    .authorization((allow) => [allow.authenticatedUser()]),
+    // Use "authenticated" instead of "authenticatedUser" to restrict access.
+    .authorization((allow) => [allow.authenticated()]),
 });
 
 export type Schema = ClientSchema<typeof schema>;
@@ -20,7 +22,7 @@ export type Schema = ClientSchema<typeof schema>;
 export const data = defineData({
   schema,
   authorizationModes: {
-    // Use Cognito User Pools for authentication instead of API key
-    defaultAuthorizationMode: "userPools",
+    // Use "userPool" (singular) for Cognito User Pools.
+    defaultAuthorizationMode: "userPool",
   },
 });
