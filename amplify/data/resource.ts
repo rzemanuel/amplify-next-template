@@ -1,4 +1,4 @@
-// resource.ts
+// amplify/data/resource.ts
 import { type ClientSchema, a, defineData } from "@aws-amplify/backend";
 
 const schema = a.schema({
@@ -6,11 +6,11 @@ const schema = a.schema({
     .model({
       fileKey: a.string(),
       uploadedAt: a.datetime(),
-      fileName: a.string(), // Added to store original filename
-      fileSize: a.number(), // Added to store file size
-      status: a.string(), // Added to track processing status
+      fileName: a.string(),
+      fileSize: a.string(), // Changed from number to string due to type constraints
+      status: a.string(),
     })
-    .authorization([a.allow.owner()])
+    .authorization([allow => allow.owner()]) // Fixed authorization syntax
 });
 
 export type Schema = ClientSchema<typeof schema>;
