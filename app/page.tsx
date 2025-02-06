@@ -1,3 +1,4 @@
+// app/page.tsx
 "use client";
 
 import React, { useState } from "react";
@@ -35,13 +36,23 @@ export default function Page() {
     setUploading(true);
     try {
       const fileKey = `uploads/${Date.now()}-${file.name}`;
-      await uploadData({
+      console.log('Starting upload...', { fileKey, fileName: file.name });
+      
+      const result = await uploadData({
         key: fileKey,
         data: file,
         options: {
-          contentType: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+          contentType: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+          onProgress: ({ transferredBytes, totalBytes }) => {
+            if (totalBytes) {
+              const percentage = (transferredBytes / totalBytes) * 100;
+              setUploadStatus(`Uploading: ${Math.round(percentage)}%`);
+            }
+          }
         }
       });
+
+      console.log('Upload complete:', result);
       setUploadStatus("Upload successful!");
       setFile(null);
     } catch (error) {
